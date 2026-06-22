@@ -37,6 +37,10 @@ Deno.serve(async (req: Request) => {
     const colorTela = body.colorTela;
     const anchoCm = body.anchoCm;
     const altoCm = body.altoCm;
+    const aberturaAnchoCm = body.aberturaAnchoCm;
+    const aberturaAltoCm = body.aberturaAltoCm;
+    const paredAnchoCm = body.paredAnchoCm;
+    const paredAltoCm = body.paredAltoCm;
 
     if (!imagenAmbienteBase64) {
       return new Response(JSON.stringify({ error: "Falta la foto del ambiente" }), {
@@ -50,11 +54,23 @@ Deno.serve(async (req: Request) => {
       ? "Esta tela es translucida (deja pasar algo de luz), debe verse semi-transparente."
       : "Esta tela es opaca (black out), debe bloquear completamente la luz y verse solida.";
 
+    let referenciaTexto = "";
+    if (aberturaAnchoCm && aberturaAltoCm) {
+      referenciaTexto += " Como referencia de escala: la abertura (ventana o puerta) visible en la foto mide aproximadamente " + aberturaAnchoCm + " cm de ancho x " + aberturaAltoCm + " cm de alto.";
+    }
+    if (paredAnchoCm && paredAltoCm) {
+      referenciaTexto += " Como referencia de escala: la pared donde esta la abertura mide aproximadamente " + paredAnchoCm + " cm de ancho x " + paredAltoCm + " cm de alto.";
+    }
+    if (referenciaTexto) {
+      referenciaTexto += " Usa estas referencias SOLO para calcular la proporcion correcta en la imagen entre la abertura y la cortina. La cortina debe dibujarse con sus medidas reales (" + anchoCm + " cm x " + altoCm + " cm), no con las medidas de la abertura.";
+    }
+
     const prompt = "Edita esta foto de un ambiente agregando una cortina roller instalada en la ventana visible. " +
-      "Especificaciones de la cortina: " +
+      "Especificaciones de la cortina (estas son las medidas reales y definitivas, ya definidas por el usuario en su presupuesto): " +
       "Tipo de tela: " + tipoTela + ". " +
       "Color: " + colorTela + ". " +
-      "Medidas aproximadas: " + anchoCm + " cm de ancho x " + altoCm + " cm de alto. " +
+      "Medidas de la cortina: " + anchoCm + " cm de ancho x " + altoCm + " cm de alto." +
+      referenciaTexto + " " +
       "La cortina debe verse instalada de forma realista, respetando la perspectiva, la luz y las sombras del ambiente original. " +
       descripcionTela + " " +
       "No modifiques el resto del ambiente, solo agrega la cortina en la ventana.";
